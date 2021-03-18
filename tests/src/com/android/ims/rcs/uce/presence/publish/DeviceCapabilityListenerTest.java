@@ -185,8 +185,6 @@ public class DeviceCapabilityListenerTest extends ImsTestBase {
         RegistrationCallback registrationCallback = deviceCapListener.mRcsRegistrationCallback;
         ImsRegistrationAttributes attr = new ImsRegistrationAttributes.Builder(
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE).build();
-        // Notify DeviceCapabilityListener that registered has caused a change and requires publish
-        doReturn(true).when(mDeviceCapability).updateImsRcsRegistered(attr);
 
         registrationCallback.onRegistered(attr);
         Handler handler = deviceCapListener.getHandler();
@@ -203,9 +201,6 @@ public class DeviceCapabilityListenerTest extends ImsTestBase {
         DeviceCapabilityListener deviceCapListener = createDeviceCapabilityListener();
         deviceCapListener.setImsCallbackRegistered(true);
         RegistrationCallback registrationCallback = deviceCapListener.mRcsRegistrationCallback;
-        // Notify DeviceCapabilityListener that unregistered has caused a change and requires
-        // publish.
-        doReturn(true).when(mDeviceCapability).updateImsRcsUnregistered();
 
         ImsReasonInfo info = new ImsReasonInfo(ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED, -1, "");
         registrationCallback.onUnregistered(info);
