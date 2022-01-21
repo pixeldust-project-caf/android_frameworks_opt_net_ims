@@ -33,9 +33,11 @@ import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.telephony.Rlog;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Provides APIs for the supplementary service settings using IMS (Ut interface).
@@ -85,9 +87,13 @@ public class ImsUt implements ImsUtInterface {
     private HashMap<Integer, Message> mPendingCmds =
             new HashMap<Integer, Message>();
     private Registrant mSsIndicationRegistrant;
+    private Executor mExecutor = Runnable::run;
 
-    public ImsUt(IImsUt iUt) {
+    public ImsUt(IImsUt iUt, Executor executor) {
         miUt = iUt;
+        if (executor != null) {
+            mExecutor = executor;
+        }
 
         if (miUt != null) {
             try {
@@ -673,22 +679,26 @@ public class ImsUt implements ImsUtInterface {
          */
         @Override
         public void utConfigurationUpdated(IImsUt ut, int id) {
-            Integer key = Integer.valueOf(id);
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                Integer key = Integer.valueOf(id);
 
-            synchronized(mLockObj) {
-                sendSuccessReport(mPendingCmds.get(key));
-                mPendingCmds.remove(key);
-            }
+                synchronized(mLockObj) {
+                    sendSuccessReport(mPendingCmds.get(key));
+                    mPendingCmds.remove(key);
+                }
+            }, mExecutor);
         }
 
         @Override
         public void utConfigurationUpdateFailed(IImsUt ut, int id, ImsReasonInfo error) {
-            Integer key = Integer.valueOf(id);
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                Integer key = Integer.valueOf(id);
 
-            synchronized(mLockObj) {
-                sendFailureReport(mPendingCmds.get(key), error);
-                mPendingCmds.remove(key);
-            }
+                synchronized(mLockObj) {
+                    sendFailureReport(mPendingCmds.get(key), error);
+                    mPendingCmds.remove(key);
+                }
+            }, mExecutor);
         }
 
         /**
@@ -719,20 +729,24 @@ public class ImsUt implements ImsUtInterface {
          */
         @Override
         public void lineIdentificationSupplementaryServiceResponse(int id, ImsSsInfo config) {
-            synchronized(mLockObj) {
-                sendSuccessReport(mPendingCmds.get(id), config);
-                mPendingCmds.remove(id);
-            }
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                synchronized(mLockObj) {
+                    sendSuccessReport(mPendingCmds.get(id), config);
+                    mPendingCmds.remove(id);
+                }
+            }, mExecutor);
         }
 
         @Override
         public void utConfigurationQueryFailed(IImsUt ut, int id, ImsReasonInfo error) {
-            Integer key = Integer.valueOf(id);
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                Integer key = Integer.valueOf(id);
 
-            synchronized(mLockObj) {
-                sendFailureReport(mPendingCmds.get(key), error);
-                mPendingCmds.remove(key);
-            }
+                synchronized(mLockObj) {
+                    sendFailureReport(mPendingCmds.get(key), error);
+                    mPendingCmds.remove(key);
+                }
+            }, mExecutor);
         }
 
         /**
@@ -741,12 +755,14 @@ public class ImsUt implements ImsUtInterface {
         @Override
         public void utConfigurationCallBarringQueried(IImsUt ut,
                 int id, ImsSsInfo[] cbInfo) {
-            Integer key = Integer.valueOf(id);
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                Integer key = Integer.valueOf(id);
 
-            synchronized(mLockObj) {
-                sendSuccessReport(mPendingCmds.get(key), cbInfo);
-                mPendingCmds.remove(key);
-            }
+                synchronized(mLockObj) {
+                    sendSuccessReport(mPendingCmds.get(key), cbInfo);
+                    mPendingCmds.remove(key);
+                }
+            }, mExecutor);
         }
 
         /**
@@ -755,12 +771,14 @@ public class ImsUt implements ImsUtInterface {
         @Override
         public void utConfigurationCallForwardQueried(IImsUt ut,
                 int id, ImsCallForwardInfo[] cfInfo) {
-            Integer key = Integer.valueOf(id);
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                Integer key = Integer.valueOf(id);
 
-            synchronized(mLockObj) {
-                sendSuccessReport(mPendingCmds.get(key), cfInfo);
-                mPendingCmds.remove(key);
-            }
+                synchronized(mLockObj) {
+                    sendSuccessReport(mPendingCmds.get(key), cfInfo);
+                    mPendingCmds.remove(key);
+                }
+            }, mExecutor);
         }
 
         /**
@@ -769,12 +787,14 @@ public class ImsUt implements ImsUtInterface {
         @Override
         public void utConfigurationCallWaitingQueried(IImsUt ut,
                 int id, ImsSsInfo[] cwInfo) {
-            Integer key = Integer.valueOf(id);
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                Integer key = Integer.valueOf(id);
 
-            synchronized(mLockObj) {
-                sendSuccessReport(mPendingCmds.get(key), cwInfo);
-                mPendingCmds.remove(key);
-            }
+                synchronized(mLockObj) {
+                    sendSuccessReport(mPendingCmds.get(key), cwInfo);
+                    mPendingCmds.remove(key);
+                }
+            }, mExecutor);
         }
 
         /**
@@ -782,9 +802,11 @@ public class ImsUt implements ImsUtInterface {
          */
         @Override
         public void onSupplementaryServiceIndication(ImsSsData ssData) {
-            if (mSsIndicationRegistrant != null) {
-                mSsIndicationRegistrant.notifyResult(ssData);
-            }
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                if (mSsIndicationRegistrant != null) {
+                    mSsIndicationRegistrant.notifyResult(ssData);
+                }
+            }, mExecutor);
         }
     }
 }
