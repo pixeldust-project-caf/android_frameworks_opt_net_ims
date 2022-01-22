@@ -1123,7 +1123,7 @@ public class ImsCall implements ICall {
              mSession = session;
 
              try {
-                 mSession.setListener(createCallSessionListener());
+                 mSession.setListener(createCallSessionListener(), mContext.getMainExecutor());
              } catch (Throwable t) {
                  loge("attachSession :: ", t);
                  throwImsException(t, 0);
@@ -1147,7 +1147,7 @@ public class ImsCall implements ICall {
             mSession = session;
 
             try {
-                session.setListener(createCallSessionListener());
+                session.setListener(createCallSessionListener(), mContext.getMainExecutor());
                 session.start(callee, mCallProfile);
             } catch (Throwable t) {
                 loge("start(1) :: ", t);
@@ -1173,7 +1173,7 @@ public class ImsCall implements ICall {
             mIsConferenceHost = true;
 
             try {
-                session.setListener(createCallSessionListener());
+                session.setListener(createCallSessionListener(), mContext.getMainExecutor());
                 session.start(participants, mCallProfile);
             } catch (Throwable t) {
                 loge("start(n) :: ", t);
@@ -2112,9 +2112,9 @@ public class ImsCall implements ICall {
 
     private void setTransientSessionAsPrimary(ImsCallSession transientSession) {
         synchronized (ImsCall.this) {
-            mSession.setListener(null);
+            mSession.setListener(null, null);
             mSession = transientSession;
-            mSession.setListener(createCallSessionListener());
+            mSession.setListener(createCallSessionListener(), mContext.getMainExecutor());
         }
     }
 
@@ -2420,7 +2420,7 @@ public class ImsCall implements ICall {
 
             // Try to clean up the transient session if it exists.
             if (mTransientConferenceSession != null) {
-                mTransientConferenceSession.setListener(null);
+                mTransientConferenceSession.setListener(null, null);
                 mTransientConferenceSession = null;
             }
 
