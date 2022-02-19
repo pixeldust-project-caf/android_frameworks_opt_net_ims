@@ -108,7 +108,6 @@ public class ImsManagerTest extends ImsTestBase {
 
         doReturn(true).when(mSubscriptionManagerProxy).isValidSubscriptionId(anyInt());
         doReturn(mSubId).when(mSubscriptionManagerProxy).getActiveSubscriptionIdList();
-        doReturn(mSubId).when(mSubscriptionManagerProxy).getSubscriptionIds(anyInt());
         doReturn(mPhoneId).when(mSubscriptionManagerProxy).getDefaultVoicePhoneId();
         doReturn(-1).when(mSubscriptionManagerProxy).getIntegerSubscriptionProperty(anyInt(),
                 anyString(), anyInt());
