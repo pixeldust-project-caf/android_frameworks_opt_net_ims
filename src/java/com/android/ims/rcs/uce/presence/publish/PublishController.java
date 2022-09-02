@@ -149,6 +149,11 @@ public interface PublishController extends ControllerBase {
          * Update the device state with the publish request result.
          */
         void refreshDeviceState(int SipCode, String reason);
+
+        /**
+         * Update the Ims unregistered. This api will be called if the IMS unregistered.
+         */
+        void updateImsUnregistered();
     }
 
     /**
